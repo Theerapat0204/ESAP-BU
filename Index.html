@@ -1,0 +1,1075 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title> Executive Store Adopter For BU</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap');
+    body{ font-family:'Sarabun',sans-serif; }
+
+    /* Sidebar */
+    .sidebar{ width:280px; transition:width .25s ease; }
+    .sidebar.closed{ width:0 !important; border-right:0 !important; overflow:hidden; }
+    @media (max-width:1024px){
+      .sidebar{ position:fixed; left:0; top:0; bottom:0; z-index:40; transform:translateX(-100%); width:280px; transition:transform .25s ease; }
+      .sidebar.open{ transform:translateX(0); }
+      .overlay{ position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:30; display:none;}
+      .overlay.show{ display:block;}
+    }
+
+    .icon-btn{ display:inline-flex; align-items:center; justify-content:center; width:28px; height:28px; border-radius:.5rem; border:1px solid rgba(15,23,42,.12); background:#fff; }
+    .icon-btn:hover{ background:#f8fafc; }
+
+    /* highlight row tone */
+    .row-yellow{ background:#FFFBD1; }
+    .row-red{ background:#FFE5E9; }
+
+    /* Pills */
+    .pill{ display:inline-flex; align-items:center; gap:.25rem; padding:.125rem .5rem; border-radius:999px; font-weight:600; font-size:12px; }
+    .pill-green{ background:#10b981; color:#fff; }
+    .pill-yellow{ background:#FFFF00; color:#000; }
+    .pill-red{ background:#e11d48; color:#fff; }
+
+    /* Attach 3-up */
+    .row-att{ margin-top:.25rem; }
+    .row-att .grid3{ display:grid; grid-template-columns:repeat(3,1fr); gap:.25rem; }
+    .row-att img{ width:100%; height:56px; object-fit:cover; border-radius:.375rem; border:1px solid rgba(15,23,42,.1); }
+    .row-att .nav{ display:flex; align-items:center; gap:.25rem; margin-top:.25rem; }
+    .row-att .page{ font-size:11px; color:#475569; }
+
+    /* Modal */
+    .modal{ position:fixed; inset:0; z-index:50; display:none; pointer-events:none; }
+    .modal.show{ display:block; pointer-events:auto; }
+    .modal .backdrop{ position:absolute; inset:0; background:rgba(2,6,23,.45); backdrop-filter:blur(2px); }
+    .modal .panel{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; padding:16px; }
+    .modal .card{ width:100%; max-width:1000px; background:#fff; border-radius:1rem; box-shadow:0 20px 48px rgba(2,6,23,.25); display:flex; flex-direction:column; max-height:90vh; overflow:hidden; }
+    .modal .head{ padding:.875rem 1rem; border-bottom:1px solid #e2e8f0; display:flex; align-items:start; justify-content:space-between; gap:1rem; position:sticky; top:0; background:#fff; z-index:1; }
+    .modal .body{ padding:1rem; overflow-y:auto; }
+    .modal .foot{ padding:1rem; border-top:1px solid #e2e8f0; position:sticky; bottom:0; background:#fff; z-index:1; }
+
+    .meta-row{ display:grid; grid-template-columns:1fr; gap:.25rem; }
+    @media (min-width:768px){ .meta-row{ grid-template-columns:repeat(3,1fr); } }
+    .meta-item{ font-size:13px; color:#334155; }
+    .meta-item .label{ color:#64748b; margin-right:.25rem; }
+    .meta-item .text{ display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+
+    .logo-wide { aspect-ratio: 1355 / 392; height: 48px; width: auto; object-fit: contain; }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-emerald-50 via-teal-50 to-sky-50 min-h-screen">
+
+<!-- =================== LOGIN (กรอกชื่อ BU) =================== -->
+<section id="loginPage" class="min-h-screen flex items-center justify-center p-6">
+  <div class="max-w-3xl w-full">
+    <div class="rounded-3xl border bg-white/90 backdrop-blur p-8 shadow-2xl">
+      <div class="flex items-center gap-4 mb-6">
+        <img src="ESAPlogo.png" class="logo-wide rounded-md shadow" alt="logo">
+        <div>
+          <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight text-slate-900">Executive Store Adopter-BU</h1>
+          <p class="text-slate-600 -mt-0.5">กรุณาเข้าสู่ระบบ (ใส่ชื่อ BU)</p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
+        <div class="md:col-span-8">
+         <label class="block text-sm font-medium mb-1">เลือกหน่วยงานของท่าน</label>
+<select id="code" class="w-full border rounded-2xl px-3 py-2.5 shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-300">
+  <option value="" disabled selected>— กรุณาเลือก BU —</option>
+  <option>Commercial</option>
+  <option>HR</option>
+  <option>Supply Chain</option>
+  <option>Maintenance</option>
+  <option>Town Center</option>
+  <option>Property</option>
+  <option>Wawee</option>
+  <option>Pure</option>
+  <option>Marketing</option>
+  <option>Operation</option>
+</select>
+ 
+        </div>
+        <div class="md:col-span-4">
+          <button id="btnLogin" class="w-full rounded-2xl bg-emerald-600 text-white px-4 py-3 font-bold shadow hover:bg-emerald-700 active:scale-[.99] transition">
+            เข้าสู่ระบบ
+          </button>
+        </div>
+      </div>
+
+      <p id="loginInfo" class="text-sm text-slate-600 mt-3"></p>
+    </div>
+  </div>
+</section>
+
+<!-- =================== APP =================== -->
+<section id="appShell" class="hidden">
+  <div id="sbOverlay" class="overlay"></div>
+  <div class="flex">
+    <!-- Sidebar -->
+    <aside id="sidebar" class="sidebar bg-white/90 border-r backdrop-blur lg:translate-x-0">
+      <div class="p-4 border-b">
+        <div class="font-bold text-slate-900">BU Portal</div>
+        <div id="whoami" class="text-xs text-slate-600">—</div>
+      </div>
+      <nav class="p-2">
+        <div class="px-3 py-2 text-xs text-slate-500">เมนู</div>
+        <button data-tab="tabStore" class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-100 font-medium bg-slate-100">
+          <svg class="w-5 h-5 text-emerald-600" viewBox="0 0 24 24" fill="none"><path d="M3 12h8V3H3v9Zm10 9h8V12h-8v9ZM3 21h8v-7H3v7Zm10-18v7h8V3h-8Z" stroke="currentColor" stroke-width="1.5"/></svg>
+         Executive Store Adopter For BU 
+        </button>
+        <button id="btnLogout" class="w-full mt-2 flex items-center gap-3 px-3 py-2 rounded-lg bg-rose-50 text-rose-700 hover:bg-rose-100 font-medium">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none"><path d="M16 17l5-5-5-5M21 12H9M13 7V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2h6a2 2 0 002-2v-2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          ออกจากระบบ
+        </button>
+      </nav>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="flex-1 min-h-screen">
+      <!-- Top bar -->
+      <div class="flex items-center justify-between p-3 bg-white/80 backdrop-blur sticky top-0 z-30 border-b">
+        <div class="flex items-center gap-2">
+          <button id="btnHamburger" class="p-2 rounded-lg border text-slate-700 hover:bg-slate-50" title="เมนู">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          </button>
+          <div class="font-semibold text-slate-900">Executive Store Adopter For BU</div>
+        </div>
+        <div class="text-xs text-slate-500" id="resInfoTop">—</div>
+      </div>
+
+      <!-- ======= DASHBOARD STATUS (BU) ======= -->
+<div id="buStatusTiles" class="px-3 pt-3 pb-2 bg-white/80 backdrop-blur border-b">
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+    <div id="tileDone"   class="rounded-2xl p-4 shadow text-white bg-gradient-to-br from-emerald-600 to-emerald-500"></div>
+    <div id="tileInProg" class="rounded-2xl p-4 shadow text-white bg-gradient-to-br from-sky-600 to-sky-500"></div>
+    <div id="tileSent"   class="rounded-2xl p-4 shadow text-slate-900 bg-gradient-to-br from-amber-400 to-amber-300"></div>
+    <div id="tileNone"   class="rounded-2xl p-4 shadow text-white bg-gradient-to-br from-rose-600 to-rose-500"></div>
+  </div>
+</div>
+
+
+      <!-- Filters (แบบ Site-Store) -->
+      <div class="sticky top-[56px] z-20 bg-white/70 backdrop-blur border-b">
+        <div class="px-3 py-2">
+        <div class="p-2 rounded-xl border bg-white/80">
+  <div class="text-[11px] font-semibold text-slate-600 mb-1">Filters</div>
+  <div class="flex flex-nowrap items-end gap-2 overflow-x-auto py-1">
+
+    <label class="block min-w-[140px]">
+      <span class="block text-[11px] text-slate-500 mb-0.5">Round</span>
+      <select id="f_round" class="w-full border rounded p-2 text-sm"></select>
+    </label>
+
+    <label class="block min-w-[140px]">
+      <span class="block text-[11px] text-slate-500 mb-0.5">VP</span>
+      <select id="f_vp" class="w-full border rounded p-2 text-sm"></select>
+    </label>
+
+    <label class="block min-w-[180px]">
+      <span class="block text-[11px] text-slate-500 mb-0.5">Area</span>
+      <select id="f_area" class="w-full border rounded p-2 text-sm"></select>
+    </label>
+
+    <label class="block min-w-[200px]">
+      <span class="block text-[11px] text-slate-500 mb-0.5">Topic</span>
+      <select id="f_topic" class="w-full border rounded p-2 text-sm"></select>
+    </label>
+
+    <label class="block min-w-[160px]">
+      <span class="block text-[11px] text-slate-500 mb-0.5">Format</span>
+      <select id="f_format" class="w-full border rounded p-2 text-sm"></select>
+    </label>
+
+<label class="block min-w-[160px]">
+  <span class="block text-[11px] text-slate-500 mb-0.5">Status</span>
+  <select id="f_status" class="w-full border rounded p-2 text-sm">
+    <option value="">ทั้งหมด</option>
+    <option>Sent BU</option>
+    <option>In progress</option>
+    <option>Done</option>
+  </select>
+</label>
+
+    <label class="block min-w-[200px]">
+      <span class="block text-[11px] text-slate-500 mb-0.5">Store</span>
+      <input id="f_store" class="w-full border rounded p-2 text-sm" placeholder="รหัสหรือชื่อสาขา" />
+    </label>
+
+    <div class="flex items-end gap-2 ml-auto pr-1">
+      <button id="btnSearch" class="px-3 py-2 rounded border bg-sky-600 text-white text-sm">ค้นหา</button>
+      <button id="btnReset" class="px-3 py-2 rounded border bg-white text-sm">รีเซ็ต</button>
+    </div>
+  </div>
+</div>  
+
+      <!-- AREA -> TOPIC -> QUESTION (Round1/2/3) -->
+      <div class="p-4 space-y-6" id="areaContainers"></div>
+      <div class="px-4 pb-6 text-xs text-slate-500 flex items-center justify-between">
+        <div id="resInfo">—</div>
+        <div class="flex items-center gap-2">
+          <button id="prev" class="px-3 py-1.5 rounded border bg-white hover:bg-slate-50">Prev</button>
+          <button id="next" class="px-3 py-1.5 rounded border bg-white hover:bg-slate-50">Next</button>
+          <span id="pgInfo" class="text-xs text-slate-500"></span>
+        </div>
+      </div>
+    </main>
+  </div>
+</section>
+
+<!-- Loader -->
+<div id="loader" class="fixed inset-0 bg-white/60 backdrop-blur-sm hidden z-50">
+  <div class="absolute inset-0 flex items-center justify-center">กำลังโหลด...</div>
+</div>
+
+<!-- =================== MODAL: Read-only Comment/Reason + Editable Action/Status/Due =================== -->
+<div id="actionModal" class="modal" aria-hidden="true">
+  <div class="backdrop"></div>
+  <div class="panel">
+    <div class="card">
+      <div class="head">
+        <div class="space-y-2">
+          <div class="text-xs text-slate-500">รายละเอียด (รอบที่ <span id="am_round">-</span>)</div>
+          <div class="meta-row">
+            <div class="meta-item"><span class="label">Area:</span><span id="am_meta_area" class="text"></span></div>
+            <div class="meta-item"><span class="label">Topic:</span><span id="am_meta_topic" class="text"></span></div>
+            <div class="meta-item"><span class="label">Question:</span><span id="am_meta_question" class="text"></span></div>
+          </div>
+        </div>
+        <button class="icon-btn" id="am_close" title="ปิด">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+      <div class="body space-y-5">
+        <section>
+          <div class="text-xs text-slate-500 mb-1">Comment From Adopter</div>
+          <div id="am_comment_ro" class="whitespace-pre-wrap rounded-lg border bg-slate-50 p-3 leading-relaxed text-[15px] text-slate-700 min-h-[56px]">—</div>
+        </section>
+        <section>
+          <div class="text-xs text-slate-500 mb-1">Reason From Operation</div>
+          <div id="am_reason_ro" class="whitespace-pre-wrap rounded-lg border bg-slate-50 p-3 text-[14px] text-slate-700 min-h-[44px]">—</div>
+        </section>
+        <section>
+          <div class="text-xs text-slate-500 mb-2">Action </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <label class="block md:col-span-2">
+              <span class="text-xs text-slate-500">Action</span>
+              <textarea id="am_action" class="mt-1 w-full border rounded-lg p-2 min-h-[120px]" placeholder="กรอกแผนดำเนินการของ BU"></textarea>
+            </label>
+            <label class="block">
+              <span class="text-xs text-slate-500">Status</span>
+              <select id="am_status" class="mt-1 w-full border rounded-lg p-2">
+                <option>Sent BU</option>
+                <option>In progress</option>
+                <option>Done</option>
+              </select>
+            </label>
+            <label class="block">
+              <span class="text-xs text-slate-500">Due</span>
+              <input id="am_due" type="date" class="mt-1 w-full border rounded-lg p-2">
+            </label>
+          </div>
+        </section>
+      </div>
+      <div class="foot flex items-center justify-between">
+        <div class="text-xs text-slate-500">*Reason from Operation to request to BU </div>
+        <div class="flex items-center gap-2">
+          <button id="am_save" class="px-4 py-2 rounded-lg bg-emerald-600 text-white">บันทึก</button>
+          <button id="am_cancel" class="px-4 py-2 rounded-lg border bg-white">ยกเลิก</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/***************** Supabase Config *****************/
+const SUPABASE_URL = 'https://iodmkpvgrvlpiydurimv.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlvZG1rcHZncnZscGl5ZHVyaW12Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc5MTE5MDksImV4cCI6MjA3MzQ4NzkwOX0.8lGDPEnViaLBY0mDf2IfsfwGI8qBFO7G01tC_BnR3cs';
+
+let SB = null;
+let CURRENT_BU = '';
+let ALL_ITEMS = [];
+let TOTAL = 0, LIMIT = 600, PAGE = 1;
+let AM_CTX = null; // บริบท modal
+
+const qs = id => document.getElementById(id);
+const show = (el,on)=> el.classList[on?'remove':'add']('hidden');
+const loading = (on)=> show(qs('loader'), on);
+
+function sbInit(){
+  SB = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth:{ persistSession:false } });
+}
+
+/***************** Helpers *****************/
+function getActionId(obj){ return obj?.actionid ?? obj?.action_id ?? obj?.actionId ?? null; }
+function normalizeImageUrl(u){
+  if(!u) return '';
+  try{
+    const url = new URL(u);
+    const host = url.hostname;
+
+    // Google Drive
+    if (host.includes('drive.google.com')){
+      // รองรับทั้ง /file/d/ID/ และ id=ID
+      const m = u.match(/\/file\/d\/([^/]+)\//);
+      const id = m?.[1] || url.searchParams.get('id');
+      if (id) return `https://drive.google.com/uc?export=view&id=${id}`;
+    }
+
+    // Dropbox
+    if (host.includes('dropbox.com')){
+      url.searchParams.set('raw','1');
+      url.searchParams.delete('dl');
+      return url.toString();
+    }
+
+    // (ถ้ามีลิงก์อื่นก็ให้ผ่านตรงๆ)
+    return u;
+  }catch(_){ return u; }
+}
+
+function mapRowToItem(r){
+  // รวมลิงก์แนบจากหลายคอลัมน์
+  const rawLinks = [r.attach_1, r.attach_2, r.attch_2, r.attach_3]
+    .map(v => (v ?? '').trim())
+    .filter(Boolean);
+
+  const urls = Array.from(new Set(rawLinks.map(normalizeImageUrl))).filter(Boolean);
+  const attachments = urls.map(u => ({ url: u }));
+
+  return {
+    refno:       r.refno,
+    round:       r.round,
+    area:        r.area,
+    topic:       r.topic,
+    question:    r.question,
+    storeCode:   r.storecode ?? r.storeCode ?? '',
+    storeName:   r.storename ?? r.storeName ?? '',
+    region:      r.region ?? '',
+    format:      r.format ?? '',
+    answer:      r.answer ?? '',
+    result:      r.answer ?? '',
+    comment:     r.comment ?? '',
+    reason:      r.reason ?? '',
+    attachments,
+    actionId:    r.actionid ?? r.action_id ?? r.actionId ?? null,
+
+    // ✅ อ่านจากคอลัมน์จริงของ SITESTORE
+    action: {
+      text:   (r.action_text ?? r.action ?? '') || '',
+      status: (r.action_status ?? r.actionstatus ?? '') || '',
+      dueDate:(r.due_date ?? r.duedate ?? null)
+    },
+
+    dueDate:     r.duedate ?? r.due_date ?? null,
+    status:      r.actionstatus ?? r.action_status ?? null,
+    bu:          r.bu ?? ''
+  };
+}
+
+function normalizeAttachments(att){
+  try{
+    if(!att) return [];
+    if (Array.isArray(att)) return att.map(x=> typeof x==='string'? x : x?.url).filter(Boolean).map(normalizeImageUrl);
+    if (typeof att === 'string'){
+      if (att.trim().startsWith('[')) return normalizeAttachments(JSON.parse(att));
+      return att.split(',').map(s=>s.trim()).filter(Boolean).map(normalizeImageUrl);
+    }
+    return [];
+  }catch(_){ return []; }
+}
+function pill(ans){
+  const a = String(ans||'').toLowerCase();
+  if(/green/.test(a))  return `<span class="pill pill-green">Green</span>`;
+  if(/yellow/.test(a)) return `<span class="pill pill-yellow">Yellow</span>`;
+  if(/red/.test(a))    return `<span class="pill pill-red">Red</span>`;
+  return `<span class="text-slate-400">-</span>`;
+}
+function toneClass(ans){
+  const a = String(ans||'').toLowerCase();
+  if(/red/.test(a)) return 'row-red';
+  if(/yellow/.test(a)) return 'row-yellow';
+  return '';
+}
+
+
+/***************** Query: SITESTORE (filter bu) *****************
+ * NOTE: ถ้าตารางคุณเป็นตัวพิมพ์ใหญ่ (เช่น "SITESTORE") ต้องใส่ชื่อแบบมีเครื่องหมายคำพูดคู่
+ *       SB.from('"SITESTORE"')
+ * ถ้าตารางเป็นตัวพิมพ์เล็ก ใช้ SB.from('sitestore') ได้เลย
+ ****************************************************************/
+async function sbSearchBuItems({ round, area, topic, limit = LIMIT, page = PAGE }){
+  // ถ้าชื่อตารางใน DB เป็นตัวเล็ก ให้ใช้ 'sitestore'
+  // ถ้าเป็นตัวใหญ่ create แบบไม่อ้าง quote ได้ (supabase-js จะทำถูกเอง)
+  let q = SB.from('SITESTORE')
+
+  .select(
+    `refno,round,area,topic,question,storecode,storename,region,format,answer,comment,reason,
+     attach_1,attach_2,attach_3,
+     action,actionid,actionstatus,duedate,bu`,
+    { count: 'exact' }
+  )
+  .eq('bu', CURRENT_BU);
+
+
+  if (round) q = q.eq('round', round);
+  if (area)  q = q.ilike('area', `%${area}%`);
+  if (topic) q = q.ilike('topic', `%${topic}%`);
+
+  
+  const from = (page - 1) * limit;
+  const to   = from + limit - 1;
+
+  const { data, count, error } = await q
+    .order('area',       { ascending: true })
+    .order('topic',      { ascending: true })
+    .order('storecode', { ascending: true })
+    .order('round',      { ascending: true })
+    .range(from, to);
+
+  if (error) throw error;
+
+  return {
+    total: count ?? 0,
+    items: (data || []).map(mapRowToItem),
+  };
+}
+/***************** Save: Action/Status/Due *****************
+ * บันทึกลงตาราง actions (เหมือน SITESTORE flow เดิม)
+ * ถ้าระบบของคุณเก็บ action ไว้ในตาราง SITESTORE เอง ให้แก้จาก SB.from('actions')
+ * เป็น SB.from('"SITESTORE"') และเปลี่ยน .update/insert ให้ตรงคอลัมน์ของคุณ
+ ***********************************************************/
+// ✅ เขียน Action ลงตาราง SITESTORE โดยตรง
+async function sbSaveAction(payload){
+  const { refno, action, actionId, context } = payload;
+  const patch = {
+    action:        action?.text ?? null,
+    actionstatus:  action?.status ?? null,
+    duedate:       action?.dueDate ?? null,
+    bu:            CURRENT_BU   // กันกรณีแถวเดิมยังว่าง
+  };
+
+  // 1) ถ้ามี actionId ให้เจาะอัปเดตด้วย actionid
+  if (actionId) {
+    const { data, error } = await SB
+      .from('SITESTORE')
+      .update(patch)
+      .eq('actionid', actionId)
+      .select('id');   // บังคับให้คืนแถว
+    if (error) throw error;
+    if (!data?.length) throw new Error('ไม่พบแถวสำหรับ actionId นี้');
+    return true;
+  }
+
+  // 2) ไม่มี actionId -> match แบบระบุบริบทให้แคบพอ
+  let q = SB.from('SITESTORE')
+    .update(patch)
+    .eq('refno', refno)
+    .eq('bu', CURRENT_BU)
+    .eq('topic', context?.topic || '')
+    .eq('question', context?.question || '');
+
+  if (context?.storeCode) q = q.eq('storecode', context.storeCode);
+  if (context?.round)     q = q.eq('round', context.round);
+
+  const { data, error } = await q.select('id');  // ให้คืนจำนวนที่อัปเดต
+  if (error) throw error;
+  if (!data?.length) throw new Error('ไม่พบแถวที่จะอัปเดต (ลองระบุ store/round ให้ชัด)');
+  return true;
+}
+
+
+
+/***************** Login *****************/
+qs('btnLogin').onclick = async ()=>{
+  const code = (qs('code').value||'').trim();
+  if(!code) return alert('กรุณาเลือก BU');
+  try{
+    loading(true);
+    sbInit();
+    CURRENT_BU = code;
+
+    show(qs('loginPage'), false); show(qs('appShell'), true);
+    qs('whoami').textContent = `BU (${CURRENT_BU})`;
+
+    PAGE = 1;
+    await search();
+  }catch(ex){ alert(ex.message||ex); }
+  finally{ loading(false); }
+};
+qs('code').addEventListener('keydown', e => {
+  if (e.key === 'Enter' || e.key === ' ') qs('btnLogin').click();
+});
+
+qs('btnLogout').onclick = ()=> location.reload();
+
+/***************** Filters & Paging *****************/
+qs('btnSearch').onclick = async ()=>{ PAGE=1; await search(); };
+qs('btnReset').onclick = async ()=>{
+  qs('f_round').value=''; qs('f_area').value=''; qs('f_topic').value='';
+  qs('f_format').value=''; 
+  qs('f_status').value=''; qs('f_store').value='';
+  PAGE=1; await search();
+};
+
+qs('prev').onclick = async ()=>{ if(PAGE>1){ PAGE--; await search(); } };
+qs('next').onclick = async ()=>{
+  const maxPg = Math.max(1, Math.ceil(TOTAL/LIMIT));
+  if(PAGE<maxPg){ PAGE++; await search(); }
+};
+
+/* ===== Helpers for status ===== */
+function normalizeStatus(s){
+  const v = String(s||'').trim().toLowerCase();
+  if(!v) return 'none';
+  if(v==='done') return 'done';
+  if(v==='in progress' || v==='inprogress') return 'inprogress';
+  if(v==='sent bu' || v==='sent to bu' || v==='sent') return 'sent';
+  return 'none';
+}
+
+/* ===== Render Dashboard tiles (BU) ===== */
+function renderStatusTilesBU(){
+  // นับเฉพาะข้อที่เป็น Yellow/Red (ที่ต้องทำ Action)
+  const YR = ALL_ITEMS.filter(it => /yellow|red/i.test(String(it.answer||it.result||'')));
+
+  const stats = { done:0, inprogress:0, sent:0, none:0 };
+  YR.forEach(it=>{
+    const k = normalizeStatus(it.action?.status || it.status);
+    if(k in stats) stats[k]++; else stats.none++;
+  });
+
+  const tiles = [
+    { id:'tileDone',   title:'DONE',        value:stats.done,       note:'Action เสร็จสิ้น' },
+    { id:'tileInProg', title:'IN PROGRESS', value:stats.inprogress, note:'กำลังดำเนินการ' },
+    { id:'tileSent',   title:'SENT BU',     value:stats.sent,       note:'รอ BU รับเรื่อง/เริ่ม' },
+    { id:'tileNone',   title:'NO ACTION',   value:stats.none,       note:'ยังไม่กำหนดแผน' },
+  ];
+
+  tiles.forEach(t=>{
+    const el = document.getElementById(t.id);
+    if(!el) return;
+    el.innerHTML = `
+      <div class="flex items-center justify-between">
+        <div class="text-[13px] opacity-90 font-semibold tracking-wide">${t.title}</div>
+        <div class="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center text-lg">${t.title==='DONE'?'✔':'🕒'}</div>
+      </div>
+      <div class="text-3xl font-extrabold mt-1">${t.value}</div>
+      <div class="text-[11px] mt-1 opacity-90">${t.note}</div>
+    `;
+  });
+}
+
+/***************** Search + Render (Pivot แบบ Site-Store) *****************/
+async function search(){
+  loading(true);
+  try{
+    const params = {
+      round: qs('f_round').value.trim(),
+      area:  qs('f_area').value.trim(),
+      topic: qs('f_topic').value.trim(),
+      limit: LIMIT,
+      page:  PAGE
+    };
+    const { total, items } = await sbSearchBuItems(params);
+    TOTAL = total; ALL_ITEMS = items;
+    bindAreaTopicOptions();
+    renderAreaContainers();
+    renderStatusTilesBU();
+    qs('resInfo').textContent = `พบ ${TOTAL} รายการ (หน้านี้ ${ALL_ITEMS.length})`;
+    qs('resInfoTop').textContent = `ทั้งหมด ${TOTAL} รายการ`;
+    qs('pgInfo').textContent = `หน้า ${PAGE} / ${Math.max(1, Math.ceil(TOTAL/LIMIT))}`;
+  }catch(ex){ alert(ex.message||ex); }
+  finally{ loading(false); }
+}
+
+function anyYellowRed(roundAns){
+  const v = [roundAns[1], roundAns[2], roundAns[3]].map(x=>String(x||'').toLowerCase());
+  if(v.some(a=>/red/.test(a))) return 'red';
+  if(v.some(a=>/yellow/.test(a))) return 'yellow';
+  return '';
+}
+
+function pivotByQuestionAcrossRounds(items){
+  const map = new Map();
+  for (const it of items){
+    const area = it.area||''; const topic = it.topic||''; const question = it.question||'';
+    const storeCode = it.storeCode||''; const storeName = it.storeName||'';
+    const round = Number(it.round||0);
+    const key = `${area}||${topic}||${question}||${storeCode}`;
+    if(!map.has(key)){
+      map.set(key, { key, area, topic, question, storeCode, storeName, roundAns:{1:null,2:null,3:null}, roundRaw:{1:null,2:null,3:null}, action:null, actionId: getActionId(it), refno: it.refno||'' });
+    }
+    const row = map.get(key);
+    if ([1,2,3].includes(round)){
+      row.roundAns[round] = it.answer||null;
+      row.roundRaw[round] = it;
+    }
+    // ใช้ action ล่าสุดจากรอบสูงสุดที่มี
+    row.action = (row.roundRaw[3]?.action || row.roundRaw[2]?.action || row.roundRaw[1]?.action || row.action || null);
+    row.actionId = getActionId(row.roundRaw[3]) || getActionId(row.roundRaw[2]) || getActionId(row.roundRaw[1]) || row.actionId;
+  }
+  return Array.from(map.values());
+}
+
+const norm = s => String(s||'').trim().toLowerCase();
+function uniqueSorted(list){
+  const s = new Set();
+  list.forEach(v => { const t = String(v??'').trim(); if(t) s.add(t); });
+  return Array.from(s).sort((a,b)=> a.localeCompare(b,'th'));
+}
+function fillSelect(sel, values, placeholder='ทั้งหมด'){
+  sel.innerHTML = `<option value="">${placeholder}</option>` +
+                  values.map(v=>`<option>${v}</option>`).join('');
+}
+
+
+function bindAreaTopicOptions(){
+  const selRound  = qs('f_round');
+  const selVP     = qs('f_vp');
+  const selArea   = qs('f_area');
+  const selTopic  = qs('f_topic');
+  const selFormat = qs('f_format');
+  const selStatus = qs('f_status');  
+
+  // ตัวเลือกเริ่มต้นจากข้อมูลทั้งหมด
+  const rounds  = uniqueSorted(ALL_ITEMS.map(x=>x.round).filter(Boolean));
+  const vps     = uniqueSorted(ALL_ITEMS.map(x=>x.region));
+  const areas   = uniqueSorted(ALL_ITEMS.map(x=>x.area));
+  const topics  = uniqueSorted(ALL_ITEMS.map(x=>x.topic));
+  const formats = uniqueSorted(ALL_ITEMS.map(x=>x.format));
+
+  fillSelect(selRound,  rounds,  'ทั้งหมด');
+  fillSelect(selVP,     vps,     'ทั้งหมด');
+  fillSelect(selArea,   areas,   'ทั้งหมด');
+  fillSelect(selTopic,  topics,  'ทั้งหมด');
+  fillSelect(selFormat, formats, 'ทั้งหมด');
+// เติมค่า Status เป็นชุดมาตรฐาน
+if (selStatus) {
+  selStatus.innerHTML = `
+    <option value="">ทั้งหมด</option>
+    <option>Sent BU</option>
+    <option>In progress</option>
+    <option>Done</option>
+  `;
+}
+
+  // เมื่อใดก็ตามที่มีการเปลี่ยนค่า -> รีเฟรชตัวเลือกอื่นให้เหลือเฉพาะค่าที่เป็นไปได้
+  const refreshDependentOptions = ()=>{
+   const rV = norm(selRound.value);
+const vV = norm(selVP.value);
+const aV = norm(selArea.value);
+const tV = norm(selTopic.value);
+const fV = norm(selFormat.value);
+const sV = norm(selStatus?.value); // ⬅️ เพิ่ม
+
+
+   const base = ALL_ITEMS.filter(x=>{
+  const okR = !rV || String(x.round) === selRound.value;
+  const okV = !vV || norm(x.region) === vV;
+  const okA = !aV || norm(x.area)   === aV;
+  const okT = !tV || norm(x.topic)  === tV;
+  const okF = !fV || norm(x.format) === fV;
+  const okS = !sV || norm(x.status || x.action?.status) === sV; 
+  return okR && okV && okA && okT && okF && okS;
+});
+
+
+    const keep = (sel, vals, ph) => {
+      const prev = sel.value;
+      fillSelect(sel, uniqueSorted(vals), ph);
+      if ([...sel.options].some(o => norm(o.value) === norm(prev))) sel.value = prev;
+    };
+
+    keep(selRound,  base.map(x=>x.round),  'ทั้งหมด');
+    keep(selVP,     base.map(x=>x.region), 'ทั้งหมด');
+    keep(selArea,   base.map(x=>x.area),   'ทั้งหมด');
+    keep(selTopic,  base.map(x=>x.topic),  'ทั้งหมด');
+    keep(selFormat, base.map(x=>x.format), 'ทั้งหมด');
+  };
+
+  [selRound, selVP, selArea, selTopic, selFormat, selStatus].forEach(el=>{
+  if (!el) return;
+  el.onchange = ()=> { refreshDependentOptions(); renderAreaContainers(); };
+});
+
+}
+
+
+function filteredItems(ignoreResult=false){
+  const areaSel   = norm(document.getElementById('f_area').value);
+  const vpSel     = norm(document.getElementById('f_vp').value);
+  const topicSel  = norm(document.getElementById('f_topic').value);
+  const formatSel = norm(document.getElementById('f_format').value);
+const storeQ    = norm(document.getElementById('f_store')?.value);
+  const statusSel = norm(document.getElementById('f_status')?.value); 
+  return ALL_ITEMS.filter(it=>{
+    const okA  = !areaSel   || norm(it.area)    === areaSel;
+    const okV  = !vpSel     || norm(it.region)  === vpSel;
+    const okT  = !topicSel  || norm(it.topic)   === topicSel;
+    const okF  = !formatSel || norm(it.format)  === formatSel;
+    const okS  = !storeQ    || norm(it.storeCode).includes(storeQ) || norm(it.storeName).includes(storeQ);
+    const okR  = ignoreResult || !result || norm(it.answer).includes(result);
+    const okAS = !statusSel  || norm(it.status || it.action?.status) === statusSel; 
+    return okA && okV && okT && okF && okS && okR && okAS;
+  });
+}
+
+function filteredPivotRows(){
+  const roundSel  = qs('f_round').value;
+  const vpSel     = norm(qs('f_vp').value);
+  const areaSel   = norm(qs('f_area').value);
+  const topicSel  = norm(qs('f_topic').value);
+  const formatSel = norm(qs('f_format').value);
+ const storeQ    = norm(qs('f_store').value);
+  const statusSel = norm(qs('f_status').value); // ⬅️ เพิ่ม
+
+  let rows = pivotByQuestionAcrossRounds(ALL_ITEMS);
+
+  if (roundSel) rows = rows.filter(r =>
+    [1,2,3].some(rd => String(r.roundRaw?.[rd]?.round ?? '') === String(roundSel))
+  );
+  if (vpSel)     rows = rows.filter(r => norm(r.roundRaw?.[1]?.region || r.roundRaw?.[2]?.region || r.roundRaw?.[3]?.region) === vpSel);
+  if (areaSel)   rows = rows.filter(r => norm(r.area)   === areaSel);
+  if (topicSel)  rows = rows.filter(r => norm(r.topic)  === topicSel);
+  if (formatSel) rows = rows.filter(r =>
+    [1,2,3].some(rd => norm(r.roundRaw?.[rd]?.format) === formatSel)
+  );
+  if (storeQ)    rows = rows.filter(r => norm(r.storeCode).includes(storeQ) || norm(r.storeName).includes(storeQ));
+  
+  // ⬅️ กรองตาม Status: ถ้ารอบใดรอบหนึ่งมี status ตรง หรือสถานะล่าสุดของแถวนั้นตรง
+  if (statusSel) {
+    rows = rows.filter(r => {
+      const anyRoundMatch = [1,2,3].some(rd => norm(r.roundRaw?.[rd]?.action?.status) === statusSel);
+      const latestMatch   = norm(r.action?.status) === statusSel;
+      return anyRoundMatch || latestMatch;
+    });
+  }
+
+  return rows;
+}
+
+function groupAreaTopicQuestion(rows){
+  const g = new Map();
+  for (const r of rows){
+    if (!g.has(r.area)) g.set(r.area, new Map());
+    const tmap = g.get(r.area);
+    if (!tmap.has(r.topic)) tmap.set(r.topic, new Map());
+    const qmap = tmap.get(r.topic);
+    if (!qmap.has(r.question)) qmap.set(r.question, []);
+    qmap.get(r.question).push(r);
+  }
+  return g;
+}
+
+const cmpTH = (a, b) => String(a ?? '').localeCompare(String(b ?? ''), 'th', { numeric: true, sensitivity: 'base' });
+
+function buildRowAttach(host, images){
+  if (!host) return;
+  host.innerHTML = '';
+  const wrap = document.createElement('div'); wrap.className='row-att';
+  const grid = document.createElement('div'); grid.className='grid3'; wrap.appendChild(grid);
+  const nav = document.createElement('div'); nav.className='nav';
+  const btnPrev=document.createElement('button'); btnPrev.className='icon-btn';
+  btnPrev.innerHTML=`<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none"><path d="M15 19l-7-7 7-7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>`;
+  const pageLbl=document.createElement('span'); pageLbl.className='page';
+  const btnNext=document.createElement('button'); btnNext.className='icon-btn';
+  btnNext.innerHTML=`<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>`;
+  nav.append(btnPrev,pageLbl,btnNext);
+
+  let page=0, size=3;
+  function render(){
+    grid.innerHTML=''; const totalPages=Math.max(1, Math.ceil(images.length/size));
+    const start=page*size; const slice=images.slice(start,start+size);
+    if(slice.length===0){ grid.innerHTML=`<div class="text-[10px] text-slate-400 col-span-3">ไม่มีรูปแนบ</div>`; nav.style.display='none'; }
+    else{
+      slice.forEach(src=>{
+        const a=document.createElement('a'); a.href=src; a.target='_blank'; a.rel='noopener';
+        const img=document.createElement('img'); img.alt='attach'; img.loading='lazy'; img.src=src;
+        img.addEventListener('error', ()=>{ a.textContent='เปิดลิงก์'; a.className='text-[11px] underline text-slate-600 flex items-center justify-center h-16 border rounded'; });
+        a.appendChild(img); grid.appendChild(a);
+      });
+      nav.style.display = images.length>size ? 'flex' : 'none';
+    }
+    pageLbl.textContent=`${Math.min(page+1,totalPages)}/${totalPages}`;
+    btnPrev.disabled=page<=0; btnNext.disabled=page>=totalPages-1;
+  }
+  btnPrev.onclick=()=>{ if(page>0){ page--; render(); } };
+  btnNext.onclick=()=>{ const totalPages=Math.ceil(images.length/size)||1; if(page<totalPages-1){ page++; render(); } };
+  host.append(wrap,nav); render();
+}
+
+function renderAreaContainers(){
+  const rows = filteredPivotRows();
+  const groups = groupAreaTopicQuestion(rows);
+  const host = qs('areaContainers'); host.innerHTML='';
+  if(!rows.length){ host.innerHTML = `<div class="text-center text-slate-600 py-8">ไม่มีข้อมูลตามตัวกรอง</div>`; return; }
+
+  const areas = Array.from(groups.keys()).sort(cmpTH);
+  for (const area of areas){
+    const topicMap = groups.get(area);
+
+    const areaCard = document.createElement('div');
+    areaCard.className = 'rounded-2xl border bg-white/90 backdrop-blur shadow-sm';
+
+    const head = document.createElement('div');
+    head.className = 'px-4 py-3 border-b flex items-center justify-between';
+    head.innerHTML = `
+      <div class="flex items-center gap-3">
+        <span class="inline-flex items-center justify-center w-8 h-8 rounded-xl bg-emerald-100 text-emerald-700 border border-emerald-200">A</span>
+        <div>
+          <div class="font-semibold text-slate-900">Area: ${area||'(ไม่ระบุพื้นที่)'}</div>
+          <div class="text-xs text-slate-500">Topic: ${topicMap.size}</div>
+        </div>
+      </div>`;
+    areaCard.appendChild(head);
+
+    const body = document.createElement('div');
+    body.className = 'p-3 space-y-3';
+
+    const topics = Array.from(topicMap.keys()).sort(cmpTH);
+    for (const topic of topics){
+      const qmap = topicMap.get(topic);
+      const topicBox = document.createElement('div'); topicBox.className = 'rounded-xl border bg-white/70';topicBox.setAttribute('data-topic-box','');
+topicBox.setAttribute('data-key', `${area}||${topic}`);
+      const topicHead = document.createElement('button'); topicHead.type='button'; topicHead.className='w-full text-left px-3 py-2 border-b bg-slate-50/70 rounded-t-xl flex items-center justify-between';
+      topicHead.innerHTML = `<span class="font-medium text-slate-800">Topic: ${topic||'-'}</span><span class="text-xs text-slate-500">คลิกเพื่อเปิด/ปิด</span>`;
+      const topicBody = document.createElement('div'); topicBody.className = 'p-2 hidden';topicBody.setAttribute('data-topic-body','');
+      topicHead.addEventListener('click', ()=> topicBody.classList.toggle('hidden'));
+
+      const questions = Array.from(qmap.keys()).sort(cmpTH);
+      for (const question of questions){
+        const items = qmap.get(question).slice().sort((a,b)=>cmpTH(a.storeCode, b.storeCode));
+        const box = document.createElement('div'); box.className='rounded-lg border bg-white mb-2';
+        box.innerHTML = `
+          <div class="px-3 py-2 border-b bg-white rounded-t-lg">
+            <div class="text-[13px] text-slate-700"><span class="font-semibold">Question:</span> ${question||'-'}</div>
+          </div>
+          <div class="p-2">
+            <table class="text-sm w-full">
+              <thead class="bg-slate-50 text-slate-700">
+                <tr>
+                  <th class="px-2 py-2 text-left  w-[220px]">Store</th>
+                  <th class="px-2 py-2 text-center w-[110px]">Round1</th>
+                  <th class="px-2 py-2 text-center w-[110px]">Round2</th>
+                  <th class="px-2 py-2 text-center w-[110px]">Round3</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>`;
+        const tbody = box.querySelector('tbody');
+
+        items.forEach(row=>{
+          const tr = document.createElement('tr');
+          const tone = anyYellowRed(row.roundAns);
+          if (tone==='red') tr.classList.add('row-red'); else if (tone==='yellow') tr.classList.add('row-yellow');
+
+          tr.innerHTML = `
+            <td class="px-2 py-2 align-top">
+              <div class="font-semibold">${row.storeCode||''}</div>
+              <div class="text-[11px] text-slate-500">${row.storeName||''}</div>
+              <div class="row-att mt-1" data-att></div>
+            </td>
+            ${[1,2,3].map(rn=>{
+  const ans = row.roundAns[rn];
+  const isYR = /yellow|red/i.test(String(ans||''));
+
+  // หา status ของ "รอบที่ rn" ก่อน ถ้าไม่มีใช้ล่าสุด
+  const perRoundAct = row.roundRaw?.[rn]?.action || null;
+  const actStatus   = (perRoundAct?.status || row.action?.status || '').trim().toLowerCase();
+  const isDone      = (actStatus === 'done');
+
+  const iconSvg = isDone
+    ? `<svg class="w-4 h-4 text-emerald-600" viewBox="0 0 24 24" fill="none">
+         <path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+       </svg>`
+    : `<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none">
+         <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+       </svg>`;
+
+  return `
+    <td class="px-2 py-2 align-top text-center">
+      <div class="flex items-center justify-center gap-2">
+        ${pill(ans)}
+        ${isYR ? `
+          <button class="icon-btn" title="${isDone ? 'เสร็จสิ้น (Done)' : 'รายละเอียดรอบ '+rn}" data-plus
+            data-refno="${row.roundRaw?.[rn]?.refno||''}"
+            data-topic="${row.topic}"
+            data-area="${row.area||''}"
+            data-question="${row.question}"
+            data-round="${rn}"
+            data-store="${row.storeCode||''}"
+            data-actionid="${row.actionId||''}"
+            data-comment="${(row.roundRaw?.[rn]?.comment||'').replace(/"/g,'&quot;')}"
+            data-reason="${(row.roundRaw?.[rn]?.reason||'').replace(/"/g,'&quot;')}"
+            data-action="${(perRoundAct?.text || row.action?.text || '').replace(/"/g,'&quot;')}"
+            data-status="${perRoundAct?.status || row.action?.status || ''}"
+            data-due="${(perRoundAct?.dueDate || row.action?.dueDate || '').slice(0,10)}">
+            ${iconSvg}
+          </button>` : ``}
+      </div>
+    </td>`;
+}).join('')}
+`;
+
+          const attHost = tr.querySelector('[data-att]');
+         const imgs = [1,2,3]
+  .flatMap(rn => (row.roundRaw?.[rn]?.attachments || []).map(a => a.url))
+  .filter(Boolean);
+
+  if (attHost) buildRowAttach(attHost, imgs);
+
+          tr.querySelectorAll('[data-plus]').forEach(btn=>{
+            btn.addEventListener('click', ()=>{
+              openActionModal({
+                refno: btn.getAttribute('data-refno'),
+                actionId: btn.getAttribute('data-actionid')||'',
+                area: btn.getAttribute('data-area')||'',
+                topic: btn.getAttribute('data-topic')||'',
+                question: btn.getAttribute('data-question')||'',
+                round: Number(btn.getAttribute('data-round'))||'',
+                storeCode: btn.getAttribute('data-store')||'', 
+                comment: btn.getAttribute('data-comment')?.replace(/&quot;/g,'"')||'',
+                reason: btn.getAttribute('data-reason')?.replace(/&quot;/g,'"')||'',
+                currentAction: btn.getAttribute('data-action')?.replace(/&quot;/g,'"')||'',
+                currentStatus: btn.getAttribute('data-status')||'Sent BU',
+                currentDue: btn.getAttribute('data-due')||''
+              });
+            });
+          });
+
+          tbody.appendChild(tr);
+        });
+
+        topicBody.appendChild(box);
+      }
+
+      topicBox.append(topicHead, topicBody);
+      body.appendChild(topicBox);
+    }
+
+    areaCard.appendChild(body);
+    host.appendChild(areaCard);
+  }
+}
+
+function getOpenTopicKeys(){
+  // เก็บ key เป็น "area||topic" ของกล่องที่เปิดอยู่
+  const keys = new Set();
+  document.querySelectorAll('[data-topic-box]').forEach(box=>{
+    const body = box.querySelector('[data-topic-body]');
+    if (body && !body.classList.contains('hidden')) {
+      keys.add(box.getAttribute('data-key'));
+    }
+  });
+  return keys;
+}
+
+function restoreOpenTopicKeys(openSet){
+  // เรียกหลัง renderAreaContainers เสร็จ
+  document.querySelectorAll('[data-topic-box]').forEach(box=>{
+    const key = box.getAttribute('data-key');
+    const body = box.querySelector('[data-topic-body]');
+    if (!body) return;
+    if (openSet.has(key)) body.classList.remove('hidden');
+  });
+}
+
+async function searchWithRestore(){
+  // เก็บสถานะเปิด/ปิด + scroll ก่อนโหลดใหม่
+  const openSet = getOpenTopicKeys();
+  const prevScroll = window.scrollY;
+
+  await search();        // ดึงข้อมูล + render ใหม่ (ตามเดิมของคุณ)
+
+  // คืนค่าเปิด/ปิด + ตำแหน่งสกอร์ล
+  restoreOpenTopicKeys(openSet);
+  window.scrollTo({ top: prevScroll, behavior: 'instant' });
+}
+
+/***************** Modal *****************/
+function openActionModal(ctx){
+  AM_CTX = ctx;
+  const setMeta=(id,val)=>{ const el=qs(id); el.textContent=val||'-'; el.title=val||'-'; };
+  setMeta('am_meta_area', ctx.area||'-');
+  setMeta('am_meta_topic', ctx.topic||'-');
+  setMeta('am_meta_question', ctx.question||'-');
+  qs('am_round').textContent = ctx.round || '-';
+  qs('am_comment_ro').textContent = ctx.comment || '—';
+  qs('am_reason_ro').textContent  = ctx.reason  || '—';
+  qs('am_action').value = ctx.currentAction || '';
+  qs('am_status').value = ctx.currentStatus || 'Sent BU';
+  qs('am_due').value    = (ctx.currentDue||'').slice(0,10);
+  const m = qs('actionModal'); m.classList.add('show'); m.setAttribute('aria-hidden','false');
+}
+function closeActionModal(){ const m = qs('actionModal'); m.classList.remove('show'); m.setAttribute('aria-hidden','true'); AM_CTX=null; }
+qs('am_close').onclick = ()=> closeActionModal();
+qs('am_cancel').onclick = ()=> closeActionModal();
+document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeActionModal(); });
+qs('actionModal').querySelector('.backdrop').onclick = ()=> closeActionModal();
+
+qs('am_save').onclick = async ()=>{
+  if(!AM_CTX) return;
+  try{
+    loading(true);
+
+    // หากเดิมเป็น Sent BU และเริ่มกรอก ให้เลื่อนเป็น In progress อัตโนมัติ
+    const prev = String(AM_CTX.currentStatus||'').trim().toLowerCase();
+    const enteredText = (qs('am_action').value||'').trim();
+    let statusVal = qs('am_status').value || AM_CTX.currentStatus || 'Sent BU';
+    if(prev.startsWith('sent') && (enteredText || qs('am_due').value)) statusVal = 'In progress';
+
+    const payload = {
+      refno: AM_CTX.refno,
+      action: { text: qs('am_action').value, dueDate: qs('am_due').value, status: statusVal }
+    };
+    if(AM_CTX.actionId) payload.actionId = AM_CTX.actionId;
+    else payload.context = { topic: AM_CTX.topic, question: AM_CTX.question };
+
+    await sbSaveAction(payload);
+
+    // ✅ ไม่ปิดโมดัล ให้ค้างไว้
+    // อัปเดตค่าในหน่วยความจำ (optimistic) เพื่อให้ไอคอน/สถานะเปลี่ยนทันที
+    try{
+      const rows = pivotByQuestionAcrossRounds(ALL_ITEMS);
+      // หาแถวที่สอดคล้องกับ ctx ปัจจุบัน
+      const hit = rows.find(r =>
+        String(r.refno)===String(AM_CTX.refno) &&
+        String(r.topic)===String(AM_CTX.topic) &&
+        String(r.question)===String(AM_CTX.question) &&
+        String(r.roundRaw?.[AM_CTX.round]?.round||'')===String(AM_CTX.round)
+      );
+      if(hit){
+        hit.action = hit.action || {};
+        hit.action.text = qs('am_action').value;
+        hit.action.status = statusVal;
+        hit.action.dueDate = qs('am_due').value;
+      }
+    }catch(_){}
+
+    // รีเฟรชจอนิดเดียวแบบคงสถานะเปิด/ปิด + ตำแหน่งสกอร์ล
+    await searchWithRestore();
+
+    // ขึ้นแจ้งเตือนเบา ๆ ในโมดัล (ไม่ alert เด้งหน้า)
+    qs('am_save').textContent = 'บันทึกแล้ว ✓';
+    setTimeout(()=> qs('am_save').textContent = 'บันทึก', 1200);
+  }catch(ex){ alert(ex.message||ex); }
+  finally{ loading(false); }
+};
+
+
+/***************** Sidebar Toggle *****************/
+const sidebar = qs('sidebar'); const overlay = qs('sbOverlay');
+qs('btnHamburger')?.addEventListener('click', ()=>{
+  closeActionModal();
+  if(window.innerWidth <= 1024){ sidebar.classList.toggle('open'); overlay.classList.toggle('show'); }
+  else{ sidebar.classList.toggle('closed'); }
+});
+overlay?.addEventListener('click', ()=>{ sidebar.classList.remove('open'); overlay.classList.remove('show'); });
+</script>
+</body>
+</html>
+
