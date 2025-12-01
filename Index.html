@@ -800,6 +800,48 @@ function buildRowAttach(host, images){
   btnNext.onclick=()=>{ const totalPages=Math.ceil(images.length/size)||1; if(page<totalPages-1){ page++; render(); } };
   host.append(wrap,nav); render();
 }
+  const AREA_COLOR_CONFIG = [
+  {
+    // Area ทางเข้าและที่จอดรถ
+    match: 'ทางเข้าและที่จอดรถ',
+    card:  'bg-emerald-50 border-emerald-200',
+    chip:  'bg-emerald-500 text-white border-emerald-600'
+  },
+  {
+    // Area บริเวณภายนอกอาคาร ลานจอดรถ ห้องน้ำ
+    match: 'บริเวณภายนอกอาคาร ลานจอดรถ และห้องน้ำ',
+    card:  'bg-sky-50 border-sky-200',
+    chip:  'bg-sky-500 text-white border-sky-600'
+  },
+  {
+    // ตัวอย่างเพิ่ม ถ้ามี Area อื่น ๆ
+    match: 'ภายในร้านค้า',
+    card:  'bg-amber-50 border-amber-200',
+    chip:  'bg-amber-500 text-white border-amber-600'
+  },
+  {
+    match: 'ห้องเย็น',
+    card:  'bg-rose-50 border-rose-200',
+    chip:  'bg-rose-500 text-white border-rose-600'
+  }
+];
+
+// ถ้าไม่ match อะไรเลย ใช้สี default
+function getAreaClasses(areaText = '') {
+  const a = areaText.toLowerCase();
+  for (const cfg of AREA_COLOR_CONFIG) {
+    if (a.includes(cfg.match.toLowerCase())) {
+      return {
+        card: cfg.card,
+        chip: cfg.chip,
+      };
+    }
+  }
+  return {
+    card: 'bg-white/90 border-slate-200',
+    chip: 'bg-emerald-100 text-emerald-700 border border-emerald-200',
+  };
+}
 
 function renderAreaContainers(){
   const rows = filteredPivotRows();
@@ -809,22 +851,25 @@ function renderAreaContainers(){
 
   const areas = Array.from(groups.keys()).sort(cmpTH);
   for (const area of areas){
-    const topicMap = groups.get(area);
+  const topicMap = groups.get(area);
 
-    const areaCard = document.createElement('div');
-    areaCard.className = 'rounded-2xl border bg-white/90 backdrop-blur shadow-sm';
+  // ใช้สีตาม Area
+  const { card, chip } = getAreaClasses(area);
 
-    const head = document.createElement('div');
-    head.className = 'px-4 py-3 border-b flex items-center justify-between';
-    head.innerHTML = `
+  const areaCard = document.createElement('div');
+  areaCard.className = `rounded-2xl border shadow-sm backdrop-blur ${card}`;
+
+  const head = document.createElement('div');
+  head.className = 'px-4 py-3 border-b flex items-center justify-between bg-white/60';
+  head.innerHTML = `
       <div class="flex items-center gap-3">
-        <span class="inline-flex items-center justify-center w-8 h-8 rounded-xl bg-emerald-100 text-emerald-700 border border-emerald-200">A</span>
+        <span class="inline-flex items-center justify-center w-8 h-8 rounded-xl ${chip}">A</span>
         <div>
-          <div class="font-semibold text-slate-900">Area: ${area||'(ไม่ระบุพื้นที่)'}</div>
+          <div class="font-semibold text-slate-900">Area: ${area || '(ไม่ระบุพื้นที่)'}</div>
           <div class="text-xs text-slate-500">Topic: ${topicMap.size}</div>
         </div>
       </div>`;
-    areaCard.appendChild(head);
+  areaCard.appendChild(head);
 
     const body = document.createElement('div');
     body.className = 'p-3 space-y-3';
@@ -832,7 +877,9 @@ function renderAreaContainers(){
     const topics = Array.from(topicMap.keys()).sort(cmpTH);
     for (const topic of topics){
       const qmap = topicMap.get(topic);
-      const topicBox = document.createElement('div'); topicBox.className = 'rounded-xl border bg-white/70';topicBox.setAttribute('data-topic-box','');
+      const topicBox = document.createElement('div');
+topicBox.className = `rounded-xl border bg-white/70/ ${card}`;
+;topicBox.setAttribute('data-topic-box','');
 topicBox.setAttribute('data-key', `${area}||${topic}`);
       const topicHead = document.createElement('button'); topicHead.type='button'; topicHead.className='w-full text-left px-3 py-2 border-b bg-slate-50/70 rounded-t-xl flex items-center justify-between';
       topicHead.innerHTML = `<span class="font-medium text-slate-800">Topic: ${topic||'-'}</span><span class="text-xs text-slate-500">คลิกเพื่อเปิด/ปิด</span>`;
@@ -1072,4 +1119,5 @@ overlay?.addEventListener('click', ()=>{ sidebar.classList.remove('open'); overl
 </script>
 </body>
 </html>
+
 
